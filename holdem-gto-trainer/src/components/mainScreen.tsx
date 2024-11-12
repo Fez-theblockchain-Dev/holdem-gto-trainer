@@ -1,5 +1,3 @@
-
-
 //  this file will store the main screen of the application
 //  it will contain the following components:
 //  - villainInfo (player type, stack size, table position ext.)
@@ -25,3 +23,13 @@ export const table = ["small blind", "big blind", "utg", "utg + 1", "low jack", 
 
 
 
+type Buttons = {
+    type: 'fold' | 'call' | 'raise';
+    enabled: boolean;
+}[]
+
+export const buttonStates : Buttons = [
+    { type: 'fold', enabled: true },
+    { type: 'call', enabled: true },
+    { type: 'raise', enabled: false }
+]
