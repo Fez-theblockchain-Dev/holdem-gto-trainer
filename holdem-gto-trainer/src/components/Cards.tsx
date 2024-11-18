@@ -1,8 +1,8 @@
-import cardDeck from "react-poker";
+// import cardDeck from "react-poker";
 import "react-poker/styles.css"
 
 
-declare module 'react-poker';
+// declare module 'react-poker';
 
 
 
