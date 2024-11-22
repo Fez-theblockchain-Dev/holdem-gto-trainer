@@ -1,9 +1,17 @@
-// import cardDeck from "react-poker";
+import cardDeck from "react-poker";
 import "react-poker/styles.css"
 
 
-// declare module 'react-poker';
 
+
+
+const cardDeck: cardDeck[] = [];
+
+
+export type cardDeck = {
+    rank: '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'T' | 'J' | 'Q' | 'K' | 'A'
+    suit: '♥' | '♦' | '♠' | '♣';
+}
 
 export enum HandRank {
     HighCard = 0,
