@@ -1,7 +1,5 @@
 
 
-
-
 type VillainInfo = {
     name: string;
 }
@@ -14,3 +12,4 @@ let villainInfo: VillainInfo[] = [
 ];
 
 console.log(villainInfo);
+
