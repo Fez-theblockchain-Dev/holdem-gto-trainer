@@ -13,16 +13,12 @@ import './App.css'
 import './Cards.tsx'
 import './mainScreen.tsx'
 
-import { SubmitHandler, useForm } from 'react-hook-form';
-import './App.css';
-import './Cards.tsx';
-import './mainScreen.tsx';
+
 type FormValues = {
   firstName: string;
   lastName: string;
   email: string;
   phoneNumber: string
-  phoneNumber: string;
 };
 
 export default function App() {

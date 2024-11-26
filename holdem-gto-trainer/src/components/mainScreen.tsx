@@ -36,5 +36,5 @@ export const buttonStates : Buttons = [
 
 
 if Button(fold) = onClick => {
-    
+
 }
