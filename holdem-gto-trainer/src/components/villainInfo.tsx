@@ -5,7 +5,7 @@ type VillainInfo = {
 }
 
 let villainInfo: VillainInfo[] = [
-    { name: "loose passive(calling station/fish)" },
+    { name: "loose passive(calling station)" },
     { name: "tight aggressive(pro)" },
     { name: "loose aggressive(maniac)" },
     { name: "tight passive(nit)" }
