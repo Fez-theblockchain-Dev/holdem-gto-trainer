@@ -33,3 +33,8 @@ export const buttonStates : Buttons = [
     { type: 'call', enabled: true },
     { type: 'raise', enabled: false }
 ]
+
+
+if Button(fold) = onClick => {
+    
+}
