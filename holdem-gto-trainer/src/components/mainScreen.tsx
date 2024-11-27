@@ -5,6 +5,27 @@
 //  - actions before it's your turn
 //  - three buttons: fold, call, raise
 
+
+import apiClient from './api/apiClient';
+
+const mainScreen: React.FC = () => {
+    const [response, setResponse] = useState<string | null>(null);
+  
+    const handleAPIRequest = async () => {
+      try {
+        const result = await apiClient.post('/completions', {
+          model: 'text-davinci-003', // Specify your model
+          prompt: 'Hello, world!',  // Replace with your input
+          max_tokens: 50,
+        });
+        setResponse(result.data.choices[0].text);
+      } catch (error) {
+        console.error('API request failed:', error);
+        setResponse('Error occurred while fetching data.');
+      }
+    };
+  
+
 export const seatPositions = {
     1: "small blind",
     2: "big blind",
