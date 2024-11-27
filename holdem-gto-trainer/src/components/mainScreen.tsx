@@ -5,8 +5,9 @@
 //  - actions before it's your turn
 //  - three buttons: fold, call, raise
 
-
+import { BrowserRouter } from "react-router";
 import apiClient from './api/apiClient';
+import { useState } from 'react';
 
 const mainScreen: React.FC = () => {
     const [response, setResponse] = useState<string | null>(null);
@@ -26,20 +27,21 @@ const mainScreen: React.FC = () => {
   
 
 export const seatPositions = {
-    1: "small blind",
-    2: "big blind",
-    3: "utg",
-    4: "utg + 1",
-    5: "low jack",
-    6: "high jack",
-    7: "cutoff",
-    8: "button"
+    0: "small blind",
+    1: "big blind",
+    2: "utg",
+    3: "utg + 1",
+    4: "low jack",
+    5: "high jack",
+    6: "cutoff",
+    7: "button"
 
 }
 
 
 
-export const table: any = ["small blind", "big blind", "utg", "utg + 1", "low jack", "high jack", "cutoff","button"]
+export const table: any = [0, 1, 2, 3, 4, 5, 6, 7];
+
 
 
 
@@ -55,6 +57,13 @@ export const buttonStates : Buttons = [
 ]
 
 
-if Button(fold) = onClick => {
-
+let buttonClicked = onClick() => {
+    if (buttonStates['fold'].enabled) {
+        buttonStates = () => 
+    } else if (buttonStates['call'].enabled) {
+        // call logic
+    } else if (buttonStates['raise'].enabled) {
+        // raise logic
+    }
+}
 }

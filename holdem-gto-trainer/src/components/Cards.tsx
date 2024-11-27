@@ -1,8 +1,5 @@
-// import cardDeck from "react-poker";
-import "react-poker/styles.css"
 
-
-// declare module 'react-poker';
+import "@chakra-ui/react"
 
 
 export enum HandRank {

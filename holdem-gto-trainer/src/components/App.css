@@ -56,7 +56,7 @@ label {
 }
 
 input[type="submit"] {
-  background: #ec5990;
+  background: #2c3bbc;
   color: white;
   text-transform: uppercase;
   border: none;
@@ -68,7 +68,7 @@ input[type="submit"] {
 }
 
 input[type="submit"]:hover {
-  background: #bf1650;
+  background: #0d2abb;
 }
 
 input[type="button"]:active,
