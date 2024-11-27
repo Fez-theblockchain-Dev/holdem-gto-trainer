@@ -14,8 +14,7 @@ const mainScreen: React.FC = () => {
     const handleAPIRequest = async () => {
       try {
         const result = await apiClient.post('/completions', {
-          model: 'text-davinci-003', // Specify your model
-          prompt: 'Hello, world!',  // Replace with your input
+          model: 'Open Ai GPT-4o', // Specify your model
           max_tokens: 50,
         });
         setResponse(result.data.choices[0].text);
@@ -40,7 +39,7 @@ export const seatPositions = {
 
 
 
-export const table = ["small blind", "big blind", "utg", "utg + 1", "low jack", "high jack", "cutoff","button"]
+export const table: any = ["small blind", "big blind", "utg", "utg + 1", "low jack", "high jack", "cutoff","button"]
 
 
 
