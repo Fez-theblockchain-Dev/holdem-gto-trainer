@@ -13,14 +13,14 @@ import { ReactDOM } from 'react-dom';
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <mainScreen />,
+    element: <mainScreen.tsx />,
     errorElement: <error />,
-  
+  error display
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <StrictMode>
      <BrowserRouter>
-    <RouterProvider router = {router} />
+     <RouterProvider router = {router} />
     </BrowserRouter>
   </StrictMode>,
   }

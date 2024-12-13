@@ -45,25 +45,53 @@ export const table: any = [0, 1, 2, 3, 4, 5, 6, 7];
 
 
 
-type Buttons = {
+interface ButtonsProps = {
     type: 'fold' | 'call' | 'raise';
     enabled: boolean;
 }[]
 
 export const buttonStates : Buttons = [
-    { type: 'fold', enabled: true },
-    { type: 'call', enabled: true },
-    { type: 'raise', enabled: false }
-]
+    Button: Boolean,
+    
+    
+    const mainScreen = () => {
+      return (
+        <>
+        
+        <button>fold</button>
+        <button>call</button>
+        <button>raise</button>
 
-
-let buttonClicked = onClick() => {
-    if (buttonStates['fold'].enabled) {
-        buttonStates = () => 
-    } else if (buttonStates['call'].enabled) {
-        // call logic
-    } else if (buttonStates['raise'].enabled) {
-        // raise logic
+        </>
+      )
     }
+    
+    mainScreen.propTypes = {Boolean}
+    
+    export default mainScreen
+]
 }
+
+
+// let buttonClicked = onClick() => {
+//     if (buttonStates['fold'].enabled) {
+//         buttonStates = () => 
+//     } else if (buttonStates['call'].enabled) {
+//         // call logic
+//     } else if (buttonStates['raise'].enabled) {
+//         // raise logic
+//     }
+// }
+
+const import React from 'react'
+
+const buttonStates = () => {
+  const 
+  return (
+    <div>mainScreen</div>
+  )
 }
+
+export default mainScreen
+
+
