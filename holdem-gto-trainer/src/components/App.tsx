@@ -7,11 +7,16 @@ whether they should call, raise, or fold to another players pre-flop action */
 
 
 
-
-import { SubmitHandler, useForm } from 'react-hook-form'
+import { createClient } from "@supabase/supabase-js";
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { useEffect, useState } from "react";
 import './App.css'
 import './Cards.tsx'
 import './mainScreen.tsx'
+
+
+const supabase = createClient('https://cjzibmypbfgceswnaxhe.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqemlibXlwYmZnY2Vzd25heGhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ1ODgzMzgsImV4cCI6MjA1MDE2NDMzOH0.W1jgE910omAlBfgA36s3juHfHbr2ltlg0hel2HD960M')
+
 
 
 type FormValues = {
@@ -19,11 +24,83 @@ type FormValues = {
   lastName: string;
   email: string;
   phoneNumber: string
-};
+}
 
 export default function App() {
-  const { register, handleSubmit } = useForm<FormValues>();
-  const onSubmit: SubmitHandler<FormValues> = data => console.log(data);
+  var { register, handleSubmit } = useForm<FormValues>();
+  const [userData, setUserData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [formData, setFormData] = useState({
+    username: '',
+    preferredStack: '',
+    gameType: ''
+  })
+
+  useEffect(() => {
+    // Initial fetch
+    const fetchUserData = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single()
+      
+      setUserData(data)
+    }
+
+    fetchUserData()
+  }, [])
+
+  useEffect(() => {
+    const loadUserPreferences = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (user) {
+        const { data, error } = await supabase
+          .from('user_preferences')
+          .select('username, preferred_stack, game_type')
+          .eq('user_id', user.id)
+          .single()
+
+        if (data && !error) {
+          setFormData({
+            username: data.username || '',
+            preferredStack: data.preferred_stack || '',
+            gameType: data.game_type || ''
+          })
+        }
+      }
+    }
+
+    loadUserPreferences()
+  }, [])
+
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    const { error } = await supabase
+      .from('users')
+      .insert([data]);
+  }
+
+  const handlePreferencesSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (user) {
+      const { error } = await supabase
+        .from('user_preferences')
+        .upsert({
+          user_id: user.id,
+          username: formData.username,
+          preferred_stack: formData.preferredStack,
+          game_type: formData.gameType
+        })
+
+      if (error) console.error('Error updating preferences:', error)
+    }
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="max-w-md mx-auto mt-8 space-y-6">

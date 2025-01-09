@@ -4,3 +4,14 @@ export type cardDeck = {
     quantity: 52
 } 
 
+
+interface suites {
+    clubs: string;
+    diamonds: string;
+    spades: string;
+    hearts: string;
+}
+
+export type Suite = "clubs" | "diamonds" | "spades" | "hearts";
+
+

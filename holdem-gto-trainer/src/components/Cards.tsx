@@ -1,7 +1,7 @@
 
 import "@chakra-ui/react"
-
-
+import 'use strict'
+interface <
 export enum HandRank {
     HighCard = 0,
     Pair = 1,
@@ -19,6 +19,7 @@ export function freshDeck() {
     const suits = ['♥', '♦', '♠', '♣'] as const;
     const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'] as const;
     return suits.flatMap(suit => ranks.map(rank => ({ suit, rank })));
+
 
 
 }

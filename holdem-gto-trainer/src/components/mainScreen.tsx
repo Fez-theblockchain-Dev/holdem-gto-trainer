@@ -5,11 +5,10 @@
 //  - actions before it's your turn
 //  - three buttons: fold, call, raise
 
-import { BrowserRouter } from "react-router";
-import apiClient from './api/apiClient';
 import { useState } from 'react';
+import { createClient } from "@supabase/supabase-js";
 
-const mainScreen: React.FC = () => {
+const MainScreen: React.FC = () => {
     const [response, setResponse] = useState<string | null>(null);
   
     const handleAPIRequest = async () => {
@@ -24,7 +23,6 @@ const mainScreen: React.FC = () => {
         setResponse('Error occurred while fetching data.');
       }
     };
-  
 
 export const seatPositions = {
     0: "small blind",
@@ -46,13 +44,13 @@ export const table: any = [0, 1, 2, 3, 4, 5, 6, 7];
 
 
 interface ButtonsProps = {
-    type: 'fold' | 'call' | 'raise';
-    enabled: boolean;
+    type: 'fold': false | 'call': Boolean | 'raise': Boolean;
+    enabled: Boolean;
 }[]
 
 export const buttonStates : Buttons = [
     Button: Boolean,
-    
+
     
     const mainScreen = () => {
       return (
@@ -68,9 +66,9 @@ export const buttonStates : Buttons = [
     
     mainScreen.propTypes = {Boolean}
     
-    export default mainScreen
+    export default MainScreen
 ]
-}
+
 
 
 // let buttonClicked = onClick() => {
@@ -83,8 +81,6 @@ export const buttonStates : Buttons = [
 //     }
 // }
 
-const import React from 'react'
-
 const buttonStates = () => {
   const 
   return (
@@ -92,6 +88,6 @@ const buttonStates = () => {
   )
 }
 
-export default mainScreen
+export default MainScreen
 
 

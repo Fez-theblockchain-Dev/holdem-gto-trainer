@@ -1,28 +1,26 @@
-
+import { createBrowserRouter, BrowserRouter, RouterProvider } from "react-router-dom";
 import { StrictMode } from 'react'
-import { Provider } from "@/components/ui/provider"
 import { createRoot } from 'react-dom/client'
 import './App.css'
-import App from './App.tsx'
+import MainScreen from './mainScreen';
 
-
-import { createBrowserRouter, BrowserRouter, RouterProvider } from "react-router-dom";
-import mainScreen from /.mainScreen.tsx;
-import { ReactDOM } from 'react-dom';
+function ErrorPage() {
+  return <div>Sorry, Something went wrong!</div>;
+}
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <mainScreen.tsx />,
-    errorElement: <error />,
-  error display
-
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-     <BrowserRouter>
-     <RouterProvider router = {router} />
-    </BrowserRouter>
-  </StrictMode>,
+    element: <MainScreen />,
+    errorElement: <ErrorPage />
   }
 ]);
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <BrowserRouter>
+      <RouterProvider router={router} />
+    </BrowserRouter>
+  </StrictMode>
+);
 
