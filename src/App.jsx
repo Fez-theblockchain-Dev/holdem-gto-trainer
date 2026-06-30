@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Box, Button, Flex, Heading, HStack, Text, VStack } from '@chakra-ui/react'
+import { FiSettings } from 'react-icons/fi'
 import { dealHoleCards, handToKey, displayRank, SUIT_SYMBOL } from './poker/cards'
 import { SCENARIOS, getStrategy, actionForKey } from './poker/ranges'
 import { MIN_HANDS_FOR_REPORT } from './poker/analysis'
 import { loadHistory, saveHistory, clearHistory } from './poker/history'
+import { loadSettings, saveSettings } from './poker/settings'
 import { PokerTable } from './components/PokerTable'
 import { ActionButtons } from './components/ActionButtons'
 import { FeedbackBanner } from './components/FeedbackBanner'
 import { RangeGrid } from './components/RangeGrid'
 import { LeakReport } from './components/LeakReport'
-
-// How long to show feedback + the solution grid before dealing the next hand.
-const AUTO_ADVANCE_MS = 2600
+import { SettingsModal } from './components/SettingsModal'
 
 function randomScenario() {
   return SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)]
@@ -28,6 +28,8 @@ export default function App() {
   const [result, setResult] = useState(null)
   const [history, setHistory] = useState(() => loadHistory())
   const [showReport, setShowReport] = useState(false)
+  const [settings, setSettings] = useState(() => loadSettings())
+  const [showSettings, setShowSettings] = useState(false)
 
   const { scenario, cards, handKey } = hand
   const strategy = useMemo(() => getStrategy(scenario), [scenario])
@@ -36,17 +38,25 @@ export default function App() {
     saveHistory(history)
   }, [history])
 
+  useEffect(() => {
+    saveSettings(settings)
+  }, [settings])
+
   const score = useMemo(
     () => ({ total: history.length, correct: history.filter((h) => h.isCorrect).length }),
     [history],
   )
+
+  const handleNext = useCallback(() => {
+    setHand(newHand())
+    setResult(null)
+  }, [])
 
   const handleSelect = useCallback(
     (action) => {
       if (result) return
       const correctAction = actionForKey(handKey, strategy, scenario)
       const correct = action === correctAction
-      setResult({ chosen: action, correctAction, correct })
       setHistory((prev) => [
         ...prev,
         {
@@ -59,21 +69,16 @@ export default function App() {
           ts: Date.now(),
         },
       ])
+      // Sonic Mode: skip the feedback pause and deal the next hand immediately.
+      if (settings.sonicMode) {
+        setHand(newHand())
+        setResult(null)
+      } else {
+        setResult({ chosen: action, correctAction, correct })
+      }
     },
-    [result, handKey, strategy, scenario],
+    [result, handKey, strategy, scenario, settings.sonicMode],
   )
-
-  const handleNext = useCallback(() => {
-    setHand(newHand())
-    setResult(null)
-  }, [])
-
-  // Auto-advance to the next scenario shortly after the user answers.
-  useEffect(() => {
-    if (!result || showReport) return undefined
-    const timer = setTimeout(handleNext, AUTO_ADVANCE_MS)
-    return () => clearTimeout(timer)
-  }, [result, showReport, handleNext])
 
   const handleReset = useCallback(() => {
     clearHistory()
@@ -89,7 +94,6 @@ export default function App() {
 
   return (
     <Box minH="100vh" bg="#0f161d" color="white" px="4" py="6">
-      <style>{`@keyframes nextHandShrink { from { width: 100%; } to { width: 0%; } }`}</style>
       <VStack maxW="900px" mx="auto" gap="6" align="stretch">
         {/* Header */}
         <Flex justify="space-between" align="center" wrap="wrap" gap="3">
@@ -132,6 +136,22 @@ export default function App() {
             >
               {showReport ? 'Back to training' : reportReady ? 'Leak Report' : `Leak Report (${score.total}/${MIN_HANDS_FOR_REPORT})`}
             </Button>
+            <Box
+              as="button"
+              onClick={() => setShowSettings(true)}
+              aria-label="Open settings"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              w="38px"
+              h="38px"
+              borderRadius="10px"
+              bg="whiteAlpha.100"
+              color="whiteAlpha.800"
+              _hover={{ bg: 'whiteAlpha.200', color: 'white' }}
+            >
+              <FiSettings size={20} />
+            </Box>
           </HStack>
         </Flex>
 
@@ -178,24 +198,10 @@ export default function App() {
                 chosen={result?.chosen}
                 correctAction={result?.correctAction}
                 scenario={scenario}
+                showNext={!settings.sonicMode}
+                onNext={handleNext}
               />
               <FeedbackBanner result={result} scenario={scenario} />
-              {result ? (
-                <VStack gap="2" w="100%" maxW="320px">
-                  <Text fontSize="12px" color="whiteAlpha.600" fontWeight="600" letterSpacing="0.5px">
-                    NEXT HAND…
-                  </Text>
-                  <Box w="100%" h="5px" bg="whiteAlpha.200" borderRadius="full" overflow="hidden">
-                    <Box
-                      key={score.total}
-                      h="100%"
-                      bg="#ffd27a"
-                      borderRadius="full"
-                      style={{ animation: `nextHandShrink ${AUTO_ADVANCE_MS}ms linear forwards` }}
-                    />
-                  </Box>
-                </VStack>
-              ) : null}
             </VStack>
 
             {/* Solution grid (revealed after answering) */}
@@ -217,6 +223,14 @@ export default function App() {
           </>
         )}
       </VStack>
+
+      {showSettings ? (
+        <SettingsModal
+          settings={settings}
+          onChange={setSettings}
+          onClose={() => setShowSettings(false)}
+        />
+      ) : null}
     </Box>
   )
 }

@@ -1,7 +1,16 @@
 import { Button, HStack } from '@chakra-ui/react'
 import { ACTION_META, actionLabel } from '../poker/ranges'
 
-export function ActionButtons({ actions, onSelect, answered, chosen, correctAction, scenario }) {
+export function ActionButtons({
+  actions,
+  onSelect,
+  answered,
+  chosen,
+  correctAction,
+  scenario,
+  showNext,
+  onNext,
+}) {
   return (
     <HStack gap="4" justify="center" wrap="wrap">
       {actions.map((action) => {
@@ -47,6 +56,25 @@ export function ActionButtons({ actions, onSelect, answered, chosen, correctActi
           </Button>
         )
       })}
+
+      {showNext ? (
+        <Button
+          onClick={onNext}
+          disabled={!answered}
+          bg="#33485c"
+          color="white"
+          opacity={answered ? 1 : 0.4}
+          minW="130px"
+          h="52px"
+          fontSize="16px"
+          fontWeight="800"
+          borderRadius="12px"
+          _hover={{ filter: answered ? 'brightness(1.12)' : 'none' }}
+          _disabled={{ cursor: 'default' }}
+        >
+          Next Hand →
+        </Button>
+      ) : null}
     </HStack>
   )
 }
