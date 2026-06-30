@@ -1,0 +1,29 @@
+HOLD'EM GTO TRAINER — LEAK REPORT
+Generated: 6/29/2026, 11:47:40 PM
+
+Hands played: 111
+Correct decisions: 101 (91% accuracy)
+
+ACTION TENDENCIES (vs. solver)
+  - Well balanced: no major over/under-use of any action.
+
+TOP LEAKS
+  1. Calling too loose — called when folding was best
+     Occurrences: 4 (40% of all mistakes)
+     Fix: You are paying off with hands that do not continue profitably. Tighten your calling range.
+  2. Bluffing too much — raised hands that should be folded
+     Occurrences: 2 (20% of all mistakes)
+     Fix: Your raising range is too wide. Cut the weakest bluffs that have no equity or blockers.
+  3. Over-folding — folded hands you should defend/call
+     Occurrences: 2 (20% of all mistakes)
+     Fix: You are folding too tight, especially in the blinds. Defend more of your continuing range.
+  4. Over-folding strong hands — folded when you should raise
+     Occurrences: 2 (20% of all mistakes)
+     Fix: You are folding hands that want to be in the pot aggressively. Widen your raising range.
+
+PERFORMANCE BY SCENARIO (weakest first)
+  - CO vs UTG Open: 86% (31/36)
+  - BTN First In: 89% (31/35)
+  - BB vs BTN Open: 98% (39/40)
+
+Note: ranges are simplified 100bb approximations for training, not exact solver output.
