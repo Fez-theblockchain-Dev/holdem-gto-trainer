@@ -1,7 +1,7 @@
 import { Box, Text } from '@chakra-ui/react'
-import { ACTION_META } from '../poker/ranges'
+import { actionLabel } from '../poker/ranges'
 
-export function FeedbackBanner({ result }) {
+export function FeedbackBanner({ result, scenario }) {
   if (!result) {
     return (
       <Box h="64px" display="flex" alignItems="center" justifyContent="center">
@@ -12,7 +12,7 @@ export function FeedbackBanner({ result }) {
     )
   }
 
-  const correctLabel = ACTION_META[result.correctAction].label
+  const correctLabel = actionLabel(result.correctAction, scenario)
 
   return (
     <Box

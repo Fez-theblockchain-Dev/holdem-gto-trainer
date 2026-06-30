@@ -66,8 +66,10 @@ export function expandRange(tokens) {
 }
 
 // Action metadata shared by buttons + grid coloring.
+// `label` is the generic fallback; scenarios provide contextual raise labels
+// (open vs 3-bet sizing) via `actionLabel`.
 export const ACTION_META = {
-  raise: { label: 'Raise 2.5x', color: '#e0653a' },
+  raise: { label: 'Raise / 3-Bet', color: '#e0653a' },
   call: { label: 'Call', color: '#3a9b7a' },
   fold: { label: 'Fold', color: '#3f6fb0' },
 }
@@ -82,6 +84,9 @@ export const SCENARIOS = [
     description:
       'It folds around to the Button, who opens to 2.5bb. Action is on you in the Big Blind.',
     actions: ['raise', 'call', 'fold'],
+    // Hero is out of position vs the open, so the GTO 3-bet is larger (~4.5x).
+    raiseType: '3bet',
+    raiseLabel: '3-Bet to 11bb',
     raise: ['JJ+', 'AQs+', 'AKo', 'A5s', 'A4s'],
     call: [
       '22+', 'ATs+', 'A2s+', 'KTs+', 'QTs+', 'J9s+', 'T8s+',
@@ -98,6 +103,9 @@ export const SCENARIOS = [
     description:
       'Everyone folds to you on the Button (100bb effective). Do you open-raise or fold?',
     actions: ['raise', 'fold'],
+    // First in: this is an open-raise, not a 3-bet.
+    raiseType: 'open',
+    raiseLabel: 'Raise to 2.5bb',
     raise: [
       '22+', 'A2s+', 'K7s+', 'Q8s+', 'J8s+', 'T8s+', '97s+', '86s+', '75s+', '64s+', '54s',
       'A7o+', 'A5o', 'K9o+', 'Q9o+', 'J9o+', 'T9o', '98o',
@@ -113,10 +121,20 @@ export const SCENARIOS = [
     description:
       'UTG opens to 2.5bb and it folds to you in the Cutoff. How do you respond?',
     actions: ['raise', 'call', 'fold'],
+    // Hero is in position vs the open, so the GTO 3-bet is smaller (~3x).
+    raiseType: '3bet',
+    raiseLabel: '3-Bet to 7.5bb',
     raise: ['QQ+', 'AKs', 'AKo', 'A5s'],
     call: ['TT-22', 'AQs', 'AJs', 'ATs', 'KQs', 'KJs', 'QJs', 'JTs', 'T9s', '98s', 'AQo', 'KQo'],
   },
 ]
+
+// Display label for an action, using the scenario's contextual raise sizing
+// (e.g. "3-Bet to 11bb" vs the generic "Raise 2.5x").
+export function actionLabel(action, scenario) {
+  if (action === 'raise' && scenario?.raiseLabel) return scenario.raiseLabel
+  return ACTION_META[action].label
+}
 
 export function getStrategy(scenario) {
   return {

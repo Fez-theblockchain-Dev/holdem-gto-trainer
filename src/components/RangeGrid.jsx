@@ -1,14 +1,14 @@
 import { Box, Grid, HStack, Text, VStack } from '@chakra-ui/react'
-import { ACTION_META, actionForKey, gridCells } from '../poker/ranges'
+import { ACTION_META, actionLabel, actionForKey, gridCells } from '../poker/ranges'
 
-function Legend({ actions }) {
+function Legend({ actions, scenario }) {
   return (
     <HStack gap="4" justify="center" wrap="wrap">
       {actions.map((a) => (
         <HStack key={a} gap="2">
           <Box w="12px" h="12px" borderRadius="3px" bg={ACTION_META[a].color} />
           <Text fontSize="12px" color="whiteAlpha.800">
-            {ACTION_META[a].label}
+            {actionLabel(a, scenario)}
           </Text>
         </HStack>
       ))}
@@ -49,7 +49,7 @@ export function RangeGrid({ scenario, strategy, currentKey }) {
           )
         })}
       </Grid>
-      <Legend actions={scenario.actions} />
+      <Legend actions={scenario.actions} scenario={scenario} />
     </VStack>
   )
 }

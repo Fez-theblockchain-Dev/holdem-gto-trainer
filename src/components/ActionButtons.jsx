@@ -1,11 +1,12 @@
 import { Button, HStack } from '@chakra-ui/react'
-import { ACTION_META } from '../poker/ranges'
+import { ACTION_META, actionLabel } from '../poker/ranges'
 
-export function ActionButtons({ actions, onSelect, answered, chosen, correctAction }) {
+export function ActionButtons({ actions, onSelect, answered, chosen, correctAction, scenario }) {
   return (
     <HStack gap="4" justify="center" wrap="wrap">
       {actions.map((action) => {
         const meta = ACTION_META[action]
+        const label = actionLabel(action, scenario)
         const isChosen = chosen === action
         const isCorrect = correctAction === action
 
@@ -42,7 +43,7 @@ export function ActionButtons({ actions, onSelect, answered, chosen, correctActi
             _hover={{ filter: answered ? 'none' : 'brightness(1.1)' }}
             _disabled={{ cursor: 'default' }}
           >
-            {meta.label}
+            {label}
           </Button>
         )
       })}
