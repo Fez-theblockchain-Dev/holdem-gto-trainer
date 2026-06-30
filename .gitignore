@@ -36,3 +36,5 @@ results.json
 
 # Vite cache
 .vite/
+.vercel
+.env*

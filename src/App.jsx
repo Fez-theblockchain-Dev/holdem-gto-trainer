@@ -1,11 +1,14 @@
-import { useCallback, useMemo, useState } from 'react'
-import { Box, Button, Flex, Heading, HStack, Text, VStack } from '@chakra-ui/react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Box, Flex, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import { dealHoleCards, handToKey, displayRank, SUIT_SYMBOL } from './poker/cards'
 import { SCENARIOS, getStrategy, actionForKey } from './poker/ranges'
 import { PokerTable } from './components/PokerTable'
 import { ActionButtons } from './components/ActionButtons'
 import { FeedbackBanner } from './components/FeedbackBanner'
 import { RangeGrid } from './components/RangeGrid'
+
+// How long to show feedback + the solution grid before dealing the next hand.
+const AUTO_ADVANCE_MS = 2600
 
 function randomScenario() {
   return SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)]
@@ -41,10 +44,18 @@ export default function App() {
     setResult(null)
   }, [])
 
+  // Auto-advance to the next scenario shortly after the user answers.
+  useEffect(() => {
+    if (!result) return undefined
+    const timer = setTimeout(handleNext, AUTO_ADVANCE_MS)
+    return () => clearTimeout(timer)
+  }, [result, handleNext])
+
   const accuracy = score.total ? Math.round((score.correct / score.total) * 100) : 0
 
   return (
     <Box minH="100vh" bg="#0f161d" color="white" px="4" py="6">
+      <style>{`@keyframes nextHandShrink { from { width: 100%; } to { width: 0%; } }`}</style>
       <VStack maxW="900px" mx="auto" gap="6" align="stretch">
         {/* Header */}
         <Flex justify="space-between" align="center" wrap="wrap" gap="3">
@@ -120,18 +131,20 @@ export default function App() {
           />
           <FeedbackBanner result={result} />
           {result ? (
-            <Button
-              onClick={handleNext}
-              bg="white"
-              color="#0f161d"
-              fontWeight="800"
-              h="48px"
-              px="8"
-              borderRadius="12px"
-              _hover={{ filter: 'brightness(0.92)' }}
-            >
-              Next Hand →
-            </Button>
+            <VStack gap="2" w="100%" maxW="320px">
+              <Text fontSize="12px" color="whiteAlpha.600" fontWeight="600" letterSpacing="0.5px">
+                NEXT HAND…
+              </Text>
+              <Box w="100%" h="5px" bg="whiteAlpha.200" borderRadius="full" overflow="hidden">
+                <Box
+                  key={score.total}
+                  h="100%"
+                  bg="#ffd27a"
+                  borderRadius="full"
+                  style={{ animation: `nextHandShrink ${AUTO_ADVANCE_MS}ms linear forwards` }}
+                />
+              </Box>
+            </VStack>
           ) : null}
         </VStack>
 
