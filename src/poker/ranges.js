@@ -74,10 +74,17 @@ export const ACTION_META = {
   fold: { label: 'Fold', color: '#3f6fb0' },
 }
 
+// Standard ~100bb GTO-approximate preflop charts. RFI (raise-first-in) ranges
+// widen by position and are tighter at a fuller (8-max) table than 6-max.
+// A generic open uses 2.5bb; facing-raise spots 3-bet to position-based sizing.
+const OPEN = { raiseType: 'open', raiseLabel: 'Raise to 2.5bb', actions: ['raise', 'fold'], call: [] }
+
 export const SCENARIOS = [
+  // ---------- Facing a raise (apply to both formats) ----------
   {
     id: 'bb-vs-btn',
     title: 'BB vs BTN Open',
+    formats: ['6max', '8max'],
     hero: 'BB',
     villain: 'BTN',
     villainAction: 'raises to 2.5bb',
@@ -95,26 +102,9 @@ export const SCENARIOS = [
     ],
   },
   {
-    id: 'btn-rfi',
-    title: 'BTN First In',
-    hero: 'BTN',
-    villain: null,
-    villainAction: null,
-    description:
-      'Everyone folds to you on the Button (100bb effective). Do you open-raise or fold?',
-    actions: ['raise', 'fold'],
-    // First in: this is an open-raise, not a 3-bet.
-    raiseType: 'open',
-    raiseLabel: 'Raise to 2.5bb',
-    raise: [
-      '22+', 'A2s+', 'K7s+', 'Q8s+', 'J8s+', 'T8s+', '97s+', '86s+', '75s+', '64s+', '54s',
-      'A7o+', 'A5o', 'K9o+', 'Q9o+', 'J9o+', 'T9o', '98o',
-    ],
-    call: [],
-  },
-  {
     id: 'co-vs-utg',
     title: 'CO vs UTG Open',
+    formats: ['6max', '8max'],
     hero: 'CO',
     villain: 'UTG',
     villainAction: 'raises to 2.5bb',
@@ -127,7 +117,120 @@ export const SCENARIOS = [
     raise: ['QQ+', 'AKs', 'AKo', 'A5s'],
     call: ['TT-22', 'AQs', 'AJs', 'ATs', 'KQs', 'KJs', 'QJs', 'JTs', 'T9s', '98s', 'AQo', 'KQo'],
   },
+
+  // ---------- 6-Max RFI ----------
+  {
+    ...OPEN,
+    id: 'utg-rfi-6',
+    title: 'UTG Open (6-Max)',
+    formats: ['6max'],
+    hero: 'UTG',
+    villain: null,
+    villainAction: null,
+    description: 'Everyone folds to you UTG at a 6-max table (100bb). Open-raise or fold?',
+    raise: ['22+', 'ATs+', 'KTs+', 'QTs+', 'JTs', 'T9s', '98s', '87s', '76s', '65s', '54s', 'A5s', 'A4s', 'AJo+', 'KQo'],
+  },
+  {
+    ...OPEN,
+    id: 'hj-rfi-6',
+    title: 'HJ Open (6-Max)',
+    formats: ['6max'],
+    hero: 'HJ',
+    villain: null,
+    villainAction: null,
+    description: 'It folds to you in the Hijack at a 6-max table (100bb). Open-raise or fold?',
+    raise: ['22+', 'A9s+', 'A5s', 'A4s', 'KTs+', 'QTs+', 'J9s+', 'T9s', '98s', '87s', '76s', '65s', '54s', 'ATo+', 'KJo+', 'QJo'],
+  },
+  {
+    ...OPEN,
+    id: 'co-rfi-6',
+    title: 'CO Open (6-Max)',
+    formats: ['6max'],
+    hero: 'CO',
+    villain: null,
+    villainAction: null,
+    description: 'It folds to you in the Cutoff at a 6-max table (100bb). Open-raise or fold?',
+    raise: ['22+', 'A2s+', 'K9s+', 'Q9s+', 'J9s+', 'T8s+', '97s+', '86s+', '75s+', '65s', '54s', 'A9o+', 'KTo+', 'QTo+', 'JTo'],
+  },
+  {
+    ...OPEN,
+    id: 'btn-rfi-6',
+    title: 'BTN Open (6-Max)',
+    formats: ['6max'],
+    hero: 'BTN',
+    villain: null,
+    villainAction: null,
+    description: 'It folds to you on the Button at a 6-max table (100bb). Open-raise or fold?',
+    raise: ['22+', 'A2s+', 'K5s+', 'Q7s+', 'J7s+', 'T7s+', '96s+', '85s+', '75s+', '64s+', '54s', '43s', 'A2o+', 'K8o+', 'Q9o+', 'J9o+', 'T9o', '98o', '87o'],
+  },
+  {
+    ...OPEN,
+    id: 'sb-rfi-6',
+    title: 'SB Open (6-Max)',
+    formats: ['6max'],
+    hero: 'SB',
+    villain: null,
+    villainAction: null,
+    description: 'It folds to you in the Small Blind at a 6-max table (100bb). Open-raise or fold?',
+    raise: ['22+', 'A2s+', 'K7s+', 'Q8s+', 'J8s+', 'T8s+', '97s+', '86s+', '75s+', '65s', '54s', 'A7o+', 'A5o', 'A4o', 'K9o+', 'Q9o+', 'J9o+', 'T9o'],
+  },
+
+  // ---------- 8-Max RFI (tighter in early positions) ----------
+  {
+    ...OPEN,
+    id: 'utg-rfi-8',
+    title: 'UTG Open (8-Max)',
+    formats: ['8max'],
+    hero: 'UTG',
+    villain: null,
+    villainAction: null,
+    description: 'Everyone folds to you UTG at a full 8-handed table (100bb). Open-raise or fold?',
+    raise: ['55+', 'ATs+', 'KJs+', 'QJs', 'JTs', 'T9s', 'A5s', 'AJo+', 'KQo'],
+  },
+  {
+    ...OPEN,
+    id: 'mp-rfi-8',
+    title: 'MP Open (8-Max)',
+    formats: ['8max'],
+    hero: 'MP',
+    villain: null,
+    villainAction: null,
+    description: 'It folds to you in Middle Position at an 8-handed table (100bb). Open-raise or fold?',
+    raise: ['44+', 'A9s+', 'A5s', 'KTs+', 'QTs+', 'J9s+', 'T9s', '98s', 'ATo+', 'KJo+', 'QJo'],
+  },
+  {
+    ...OPEN,
+    id: 'co-rfi-8',
+    title: 'CO Open (8-Max)',
+    formats: ['8max'],
+    hero: 'CO',
+    villain: null,
+    villainAction: null,
+    description: 'It folds to you in the Cutoff at an 8-handed table (100bb). Open-raise or fold?',
+    raise: ['22+', 'A2s+', 'K9s+', 'Q9s+', 'J9s+', 'T8s+', '97s+', '87s', '76s', '65s', 'A9o+', 'KTo+', 'QTo+', 'JTo'],
+  },
+  {
+    ...OPEN,
+    id: 'btn-rfi-8',
+    title: 'BTN Open (8-Max)',
+    formats: ['8max'],
+    hero: 'BTN',
+    villain: null,
+    villainAction: null,
+    description: 'It folds to you on the Button at an 8-handed table (100bb). Open-raise or fold?',
+    raise: ['22+', 'A2s+', 'K6s+', 'Q8s+', 'J8s+', 'T8s+', '97s+', '86s+', '75s+', '64s+', '54s', 'A3o+', 'K9o+', 'Q9o+', 'J9o+', 'T9o', '98o'],
+  },
 ]
+
+export const TABLE_FORMATS = [
+  { value: '6max', label: '6-Max (6 players)' },
+  { value: '8max', label: '8-Max (8 players)' },
+]
+
+export function getScenariosForFormat(format) {
+  const pool = SCENARIOS.filter((s) => s.formats?.includes(format))
+  return pool.length ? pool : SCENARIOS
+}
 
 // Display label for an action, using the scenario's contextual raise sizing
 // (e.g. "3-Bet to 11bb" vs the generic "Raise 2.5x").

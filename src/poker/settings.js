@@ -4,6 +4,7 @@ const STORAGE_KEY = 'holdem-gto-trainer:settings:v1'
 
 export const DEFAULT_SETTINGS = {
   sonicMode: false,
+  tableFormat: '6max',
 }
 
 export function loadSettings() {

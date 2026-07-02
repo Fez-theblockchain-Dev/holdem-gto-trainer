@@ -1,5 +1,7 @@
 import { Box, Flex, Heading, Text, VStack } from '@chakra-ui/react'
 import { Switch } from './ui/switch'
+import { NativeSelectRoot, NativeSelectField } from './ui/native-select'
+import { TABLE_FORMATS } from '../poker/ranges'
 
 export function SettingsModal({ settings, onChange, onClose }) {
   return (
@@ -42,6 +44,29 @@ export function SettingsModal({ settings, onChange, onClose }) {
         </Flex>
 
         <VStack align="stretch" gap="5">
+          <Box>
+            <Text fontWeight="800" color="white" fontSize="16px">
+              Table Format
+            </Text>
+            <Text fontSize="13px" color="whiteAlpha.600" mt="1" mb="2">
+              Choose the table size. Preflop ranges are tighter in early position at a fuller
+              (8-max) table than at 6-max.
+            </Text>
+            <NativeSelectRoot size="sm">
+              <NativeSelectField
+                value={settings.tableFormat}
+                items={TABLE_FORMATS}
+                onChange={(e) => onChange({ ...settings, tableFormat: e.target.value })}
+                bg="#11202c"
+                color="white"
+                borderColor="#33485c"
+                borderRadius="10px"
+              />
+            </NativeSelectRoot>
+          </Box>
+
+          <Box h="1px" bg="#233241" />
+
           <Flex justify="space-between" align="start" gap="4">
             <Box>
               <Text fontWeight="800" color="white" fontSize="16px">

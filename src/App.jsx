@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, Button, Flex, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import { FiSettings } from 'react-icons/fi'
 import { dealHoleCards, handToKey, displayRank, SUIT_SYMBOL } from './poker/cards'
-import { SCENARIOS, getStrategy, actionForKey } from './poker/ranges'
+import { getScenariosForFormat, getStrategy, actionForKey } from './poker/ranges'
 import { MIN_HANDS_FOR_REPORT } from './poker/analysis'
 import { loadHistory, saveHistory, clearHistory } from './poker/history'
 import { loadSettings, saveSettings } from './poker/settings'
@@ -13,22 +13,19 @@ import { RangeGrid } from './components/RangeGrid'
 import { LeakReport } from './components/LeakReport'
 import { SettingsModal } from './components/SettingsModal'
 
-function randomScenario() {
-  return SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)]
-}
-
-function newHand() {
-  const scenario = randomScenario()
+function newHand(format) {
+  const pool = getScenariosForFormat(format)
+  const scenario = pool[Math.floor(Math.random() * pool.length)]
   const cards = dealHoleCards()
   return { scenario, cards, handKey: handToKey(cards[0], cards[1]) }
 }
 
 export default function App() {
-  const [hand, setHand] = useState(() => newHand())
+  const [settings, setSettings] = useState(() => loadSettings())
+  const [hand, setHand] = useState(() => newHand(settings.tableFormat))
   const [result, setResult] = useState(null)
   const [history, setHistory] = useState(() => loadHistory())
   const [showReport, setShowReport] = useState(false)
-  const [settings, setSettings] = useState(() => loadSettings())
   const [showSettings, setShowSettings] = useState(false)
 
   const { scenario, cards, handKey } = hand
@@ -48,9 +45,19 @@ export default function App() {
   )
 
   const handleNext = useCallback(() => {
-    setHand(newHand())
+    setHand(newHand(settings.tableFormat))
     setResult(null)
-  }, [])
+  }, [settings.tableFormat])
+
+  // Re-deal from the new pool when the table format changes.
+  const prevFormat = useRef(settings.tableFormat)
+  useEffect(() => {
+    if (prevFormat.current !== settings.tableFormat) {
+      prevFormat.current = settings.tableFormat
+      setHand(newHand(settings.tableFormat))
+      setResult(null)
+    }
+  }, [settings.tableFormat])
 
   const handleSelect = useCallback(
     (action) => {
@@ -71,22 +78,22 @@ export default function App() {
       ])
       // Sonic Mode: skip the feedback pause and deal the next hand immediately.
       if (settings.sonicMode) {
-        setHand(newHand())
+        setHand(newHand(settings.tableFormat))
         setResult(null)
       } else {
         setResult({ chosen: action, correctAction, correct })
       }
     },
-    [result, handKey, strategy, scenario, settings.sonicMode],
+    [result, handKey, strategy, scenario, settings.sonicMode, settings.tableFormat],
   )
 
   const handleReset = useCallback(() => {
     clearHistory()
     setHistory([])
     setShowReport(false)
-    setHand(newHand())
+    setHand(newHand(settings.tableFormat))
     setResult(null)
-  }, [])
+  }, [settings.tableFormat])
 
   const accuracy = score.total ? Math.round((score.correct / score.total) * 100) : 0
   const reportReady = score.total >= MIN_HANDS_FOR_REPORT
