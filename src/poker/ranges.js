@@ -5,7 +5,7 @@
 // for a 100bb cash game, not exact solver output, and are intentionally easy to
 // tune or replace with more precise data later.
 
-import { RANKS } from './cards.js'
+import { RANKS, rankValue } from './cards.js'
 
 const idx = (r) => RANKS.indexOf(r)
 
@@ -232,6 +232,92 @@ export function getScenariosForFormat(format) {
   return pool.length ? pool : SCENARIOS
 }
 
+// ---------------- NL Hold'em rake structures (NLHE only — no PLO) ----------------
+//
+// Rake reduces the profitability of marginal hands, so heavier rake => tighter
+// ranges (you fold more). We model this by trimming the weakest fraction of each
+// range, ranked by the Chen formula (a well-known preflop hand-strength heuristic).
+// The $200 NLHE profile is the low-rake baseline (widest, closest to rake-free GTO).
+
+export const RAKE_PROFILES = [
+  {
+    value: '200nl',
+    game: 'nlhe',
+    label: 'NL Hold\'em — $200 NL online (low rake)',
+    tightness: 0,
+    description:
+      'No-Limit Hold\'em only. ~5% capped (≈1.5bb) on sites like GGPoker / ACR. Closest to rake-free GTO — widest ranges.',
+  },
+  {
+    value: '50nl',
+    game: 'nlhe',
+    label: 'NL Hold\'em — $50 NL online (mid rake)',
+    tightness: 0.08,
+    description:
+      'No-Limit Hold\'em only. ~5% capped (≈3bb) on ACR / CoinPoker. Heavier rake — slightly tighter than baseline.',
+  },
+  {
+    value: '10nl',
+    game: 'nlhe',
+    label: 'NL Hold\'em — $10 NL micro (high rake)',
+    tightness: 0.15,
+    description:
+      'No-Limit Hold\'em only. High-rake micro stakes ($0.05/$0.10): ~5% with a low cap (≈5–10bb effective). Tighter than $50 NL — fold more speculative hands.',
+  },
+  {
+    value: 'live10',
+    game: 'nlhe',
+    label: 'NL Hold\'em — live cash 10% rake',
+    tightness: 0.2,
+    description:
+      'No-Limit Hold\'em only. Heavy ~10% live rake (small caps relative to blinds). Tightest ranges — fold more marginal hands.',
+  },
+]
+
+// Settings menu: NL Hold'em rake tiers only (excludes any future PLO/other game profiles).
+export const NLHE_RAKE_PROFILES = RAKE_PROFILES.filter((p) => p.game === 'nlhe')
+
+export function getRakeProfile(value) {
+  return RAKE_PROFILES.find((p) => p.value === value) ?? RAKE_PROFILES[0]
+}
+
+// Chen formula: practical preflop hand-strength score used to decide which
+// marginal hands get cut first as rake increases.
+const CHEN_HIGH = { A: 10, K: 8, Q: 7, J: 6 }
+function cardChen(rank) {
+  return CHEN_HIGH[rank] ?? rankValue(rank) / 2
+}
+
+export function chenScore(key) {
+  const a = key[0]
+  const b = key[1]
+  const suited = key[2] === 's'
+  if (a === b) return Math.round(Math.max(cardChen(a) * 2, 5)) // pair
+
+  const hi = rankValue(a) >= rankValue(b) ? a : b
+  let score = cardChen(hi)
+  if (suited) score += 2
+
+  const gap = Math.abs(rankValue(a) - rankValue(b)) - 1
+  if (gap === 1) score -= 1
+  else if (gap === 2) score -= 2
+  else if (gap === 3) score -= 4
+  else if (gap >= 4) score -= 5
+
+  // Straight potential bonus for close, low cards.
+  if (gap <= 1 && rankValue(hi) < rankValue('Q')) score += 1
+
+  return Math.round(score)
+}
+
+// Remove the weakest `tightness` fraction of a range (by Chen score).
+function trimByRake(set, tightness) {
+  if (!tightness || tightness <= 0) return set
+  const ordered = [...set].sort((a, b) => chenScore(a) - chenScore(b))
+  const removeCount = Math.floor(ordered.length * tightness)
+  return new Set(ordered.slice(removeCount))
+}
+
 // Display label for an action, using the scenario's contextual raise sizing
 // (e.g. "3-Bet to 11bb" vs the generic "Raise 2.5x").
 export function actionLabel(action, scenario) {
@@ -239,10 +325,10 @@ export function actionLabel(action, scenario) {
   return ACTION_META[action].label
 }
 
-export function getStrategy(scenario) {
+export function getStrategy(scenario, tightness = 0) {
   return {
-    raise: expandRange(scenario.raise),
-    call: expandRange(scenario.call),
+    raise: trimByRake(expandRange(scenario.raise), tightness),
+    call: trimByRake(expandRange(scenario.call), tightness),
   }
 }
 

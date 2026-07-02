@@ -2,7 +2,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, Button, Flex, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import { FiSettings } from 'react-icons/fi'
 import { dealHoleCards, handToKey, displayRank, SUIT_SYMBOL } from './poker/cards'
-import { getScenariosForFormat, getStrategy, actionForKey } from './poker/ranges'
+import {
+  getScenariosForFormat,
+  getStrategy,
+  actionForKey,
+  getRakeProfile,
+  TABLE_FORMATS,
+} from './poker/ranges'
 import { MIN_HANDS_FOR_REPORT } from './poker/analysis'
 import { loadHistory, saveHistory, clearHistory } from './poker/history'
 import { loadSettings, saveSettings } from './poker/settings'
@@ -29,7 +35,9 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false)
 
   const { scenario, cards, handKey } = hand
-  const strategy = useMemo(() => getStrategy(scenario), [scenario])
+  const rake = getRakeProfile(settings.rakeProfile)
+  const strategy = useMemo(() => getStrategy(scenario, rake.tightness), [scenario, rake.tightness])
+  const formatLabel = TABLE_FORMATS.find((f) => f.value === settings.tableFormat)?.label ?? settings.tableFormat
 
   useEffect(() => {
     saveHistory(history)
@@ -188,6 +196,9 @@ export default function App() {
                   {SUIT_SYMBOL[cards[0].suit]} {displayRank(cards[1].rank)}
                   {SUIT_SYMBOL[cards[1].suit]} ({handKey})
                 </Box>
+              </Text>
+              <Text fontSize="11px" color="whiteAlpha.500" mt="2">
+                {formatLabel} · Rake: {rake.label}
               </Text>
             </Box>
 

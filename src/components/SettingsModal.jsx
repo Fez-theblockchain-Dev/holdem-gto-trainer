@@ -1,7 +1,7 @@
 import { Box, Flex, Heading, Text, VStack } from '@chakra-ui/react'
 import { Switch } from './ui/switch'
 import { NativeSelectRoot, NativeSelectField } from './ui/native-select'
-import { TABLE_FORMATS } from '../poker/ranges'
+import { TABLE_FORMATS, NLHE_RAKE_PROFILES, getRakeProfile } from '../poker/ranges'
 
 export function SettingsModal({ settings, onChange, onClose }) {
   return (
@@ -57,6 +57,30 @@ export function SettingsModal({ settings, onChange, onClose }) {
                 value={settings.tableFormat}
                 items={TABLE_FORMATS}
                 onChange={(e) => onChange({ ...settings, tableFormat: e.target.value })}
+                bg="#11202c"
+                color="white"
+                borderColor="#33485c"
+                borderRadius="10px"
+              />
+            </NativeSelectRoot>
+          </Box>
+
+          <Box h="1px" bg="#233241" />
+
+          <Box>
+            <Text fontWeight="800" color="white" fontSize="16px">
+              NL Hold&apos;em Rake Structure
+            </Text>
+            <Text fontSize="13px" color="whiteAlpha.600" mt="1" mb="2">
+              No-Limit Hold&apos;em only — not Pot-Limit Omaha.{' '}
+              {getRakeProfile(settings.rakeProfile).description} Heavier rake tightens the GTO
+              ranges — the trainer will expect you to fold more marginal hands.
+            </Text>
+            <NativeSelectRoot size="sm">
+              <NativeSelectField
+                value={settings.rakeProfile}
+                items={NLHE_RAKE_PROFILES.map((p) => ({ label: p.label, value: p.value }))}
+                onChange={(e) => onChange({ ...settings, rakeProfile: e.target.value })}
                 bg="#11202c"
                 color="white"
                 borderColor="#33485c"
