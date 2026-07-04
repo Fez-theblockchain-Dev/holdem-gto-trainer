@@ -267,7 +267,7 @@ export const RAKE_PROFILES = [
   {
     value: 'live10',
     game: 'nlhe',
-    label: 'NL Hold\'em — live cash 10% rake',
+    label: 'NL Hold\'em — live cash 10% rake, cap at $10',
     tightness: 0.2,
     description:
       'No-Limit Hold\'em only. Heavy ~10% live rake (small caps relative to blinds). Tightest ranges — fold more marginal hands.',
