@@ -1,16 +1,10 @@
-// Persist played-hand history to localStorage, namespaced per signed-in user so
-// each account tracks its own hands played. Falls back to a "guest" bucket when
-// no user id is available.
+// Persist played-hand history to localStorage so stats survive refreshes.
 
-const BASE_KEY = 'holdem-gto-trainer:history'
+const STORAGE_KEY = 'holdem-gto-trainer:history:v1'
 
-function keyFor(userId) {
-  return `${BASE_KEY}:${userId || 'guest'}:v1`
-}
-
-export function loadHistory(userId) {
+export function loadHistory() {
   try {
-    const raw = localStorage.getItem(keyFor(userId))
+    const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return []
     const parsed = JSON.parse(raw)
     return Array.isArray(parsed) ? parsed : []
@@ -19,17 +13,17 @@ export function loadHistory(userId) {
   }
 }
 
-export function saveHistory(userId, history) {
+export function saveHistory(history) {
   try {
-    localStorage.setItem(keyFor(userId), JSON.stringify(history))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(history))
   } catch {
     // Ignore storage errors (e.g. private mode / quota).
   }
 }
 
-export function clearHistory(userId) {
+export function clearHistory() {
   try {
-    localStorage.removeItem(keyFor(userId))
+    localStorage.removeItem(STORAGE_KEY)
   } catch {
     // Ignore.
   }

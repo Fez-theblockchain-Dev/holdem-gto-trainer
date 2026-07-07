@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, Button, Flex, Heading, HStack, Text, VStack } from '@chakra-ui/react'
-import { UserButton, useUser } from '@clerk/clerk-react'
-import { FiRefreshCw, FiSettings } from 'react-icons/fi'
+import { UserButton } from '@clerk/clerk-react'
+import { FiSettings } from 'react-icons/fi'
 import { dealHoleCards, handToKey, displayRank, SUIT_SYMBOL } from './poker/cards'
 import {
   getScenariosForFormat,
@@ -28,13 +28,10 @@ function newHand(format) {
 }
 
 export default function App() {
-  const { user } = useUser()
-  const userId = user?.id
-
   const [settings, setSettings] = useState(() => loadSettings())
   const [hand, setHand] = useState(() => newHand(settings.tableFormat))
   const [result, setResult] = useState(null)
-  const [history, setHistory] = useState([])
+  const [history, setHistory] = useState(() => loadHistory())
   const [showReport, setShowReport] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
 
@@ -43,21 +40,9 @@ export default function App() {
   const strategy = useMemo(() => getStrategy(scenario, rake.tightness), [scenario, rake.tightness])
   const formatLabel = TABLE_FORMATS.find((f) => f.value === settings.tableFormat)?.label ?? settings.tableFormat
 
-  // Load this user's saved hand history once their account is known.
-  const loadedForUser = useRef(null)
   useEffect(() => {
-    if (userId && loadedForUser.current !== userId) {
-      loadedForUser.current = userId
-      setHistory(loadHistory(userId))
-    }
-  }, [userId])
-
-  // Persist history to the signed-in user's bucket as it changes.
-  useEffect(() => {
-    if (userId && loadedForUser.current === userId) {
-      saveHistory(userId, history)
-    }
-  }, [history, userId])
+    saveHistory(history)
+  }, [history])
 
   useEffect(() => {
     saveSettings(settings)
@@ -112,20 +97,12 @@ export default function App() {
   )
 
   const handleReset = useCallback(() => {
-    clearHistory(userId)
+    clearHistory()
     setHistory([])
     setShowReport(false)
     setHand(newHand(settings.tableFormat))
     setResult(null)
-  }, [settings.tableFormat, userId])
-
-  // Restart Session button: confirm before wiping the user's hands-played count.
-  const handleRestartSession = useCallback(() => {
-    const confirmed =
-      typeof window === 'undefined' ||
-      window.confirm('Restart your session? This resets your hands played back to zero.')
-    if (confirmed) handleReset()
-  }, [handleReset])
+  }, [settings.tableFormat])
 
   const accuracy = score.total ? Math.round((score.correct / score.total) * 100) : 0
   const reportReady = score.total >= MIN_HANDS_FOR_REPORT
@@ -174,20 +151,6 @@ export default function App() {
               _hover={{ filter: 'brightness(0.95)' }}
             >
               {showReport ? 'Back to training' : reportReady ? 'Leak Report' : `Leak Report (${score.total}/${MIN_HANDS_FOR_REPORT})`}
-            </Button>
-            <Button
-              onClick={handleRestartSession}
-              disabled={score.total === 0}
-              size="sm"
-              borderRadius="10px"
-              bg="whiteAlpha.100"
-              color="whiteAlpha.800"
-              fontWeight="700"
-              _hover={{ bg: 'whiteAlpha.200', color: 'white' }}
-              _disabled={{ opacity: 0.4, cursor: 'not-allowed' }}
-            >
-              <FiRefreshCw size={15} />
-              Restart Session
             </Button>
             <Box
               as="button"
