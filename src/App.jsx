@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, Button, Flex, Heading, HStack, Text, VStack } from '@chakra-ui/react'
-import { FiSettings } from 'react-icons/fi'
+import { UserButton, useUser } from '@clerk/clerk-react'
+import { FiRefreshCw, FiSettings } from 'react-icons/fi'
 import { dealHoleCards, handToKey, displayRank, SUIT_SYMBOL } from './poker/cards'
 import {
   getScenariosForFormat,
@@ -27,10 +28,13 @@ function newHand(format) {
 }
 
 export default function App() {
+  const { user } = useUser()
+  const userId = user?.id
+
   const [settings, setSettings] = useState(() => loadSettings())
   const [hand, setHand] = useState(() => newHand(settings.tableFormat))
   const [result, setResult] = useState(null)
-  const [history, setHistory] = useState(() => loadHistory())
+  const [history, setHistory] = useState([])
   const [showReport, setShowReport] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
 
@@ -39,9 +43,21 @@ export default function App() {
   const strategy = useMemo(() => getStrategy(scenario, rake.tightness), [scenario, rake.tightness])
   const formatLabel = TABLE_FORMATS.find((f) => f.value === settings.tableFormat)?.label ?? settings.tableFormat
 
+  // Load this user's saved hand history once their account is known.
+  const loadedForUser = useRef(null)
   useEffect(() => {
-    saveHistory(history)
-  }, [history])
+    if (userId && loadedForUser.current !== userId) {
+      loadedForUser.current = userId
+      setHistory(loadHistory(userId))
+    }
+  }, [userId])
+
+  // Persist history to the signed-in user's bucket as it changes.
+  useEffect(() => {
+    if (userId && loadedForUser.current === userId) {
+      saveHistory(userId, history)
+    }
+  }, [history, userId])
 
   useEffect(() => {
     saveSettings(settings)
@@ -96,12 +112,20 @@ export default function App() {
   )
 
   const handleReset = useCallback(() => {
-    clearHistory()
+    clearHistory(userId)
     setHistory([])
     setShowReport(false)
     setHand(newHand(settings.tableFormat))
     setResult(null)
-  }, [settings.tableFormat])
+  }, [settings.tableFormat, userId])
+
+  // Restart Session button: confirm before wiping the user's hands-played count.
+  const handleRestartSession = useCallback(() => {
+    const confirmed =
+      typeof window === 'undefined' ||
+      window.confirm('Restart your session? This resets your hands played back to zero.')
+    if (confirmed) handleReset()
+  }, [handleReset])
 
   const accuracy = score.total ? Math.round((score.correct / score.total) * 100) : 0
   const reportReady = score.total >= MIN_HANDS_FOR_REPORT
@@ -151,6 +175,20 @@ export default function App() {
             >
               {showReport ? 'Back to training' : reportReady ? 'Leak Report' : `Leak Report (${score.total}/${MIN_HANDS_FOR_REPORT})`}
             </Button>
+            <Button
+              onClick={handleRestartSession}
+              disabled={score.total === 0}
+              size="sm"
+              borderRadius="10px"
+              bg="whiteAlpha.100"
+              color="whiteAlpha.800"
+              fontWeight="700"
+              _hover={{ bg: 'whiteAlpha.200', color: 'white' }}
+              _disabled={{ opacity: 0.4, cursor: 'not-allowed' }}
+            >
+              <FiRefreshCw size={15} />
+              Restart Session
+            </Button>
             <Box
               as="button"
               onClick={() => setShowSettings(true)}
@@ -166,6 +204,16 @@ export default function App() {
               _hover={{ bg: 'whiteAlpha.200', color: 'white' }}
             >
               <FiSettings size={20} />
+            </Box>
+            <Box display="flex" alignItems="center">
+              <UserButton
+                afterSignOutUrl="/sign-in"
+                appearance={{
+                  elements: {
+                    avatarBox: { width: '38px', height: '38px' },
+                  },
+                }}
+              />
             </Box>
           </HStack>
         </Flex>
