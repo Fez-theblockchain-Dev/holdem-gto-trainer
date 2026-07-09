@@ -241,10 +241,13 @@ export function LeakReport({ history, onClose, onReset }) {
         <Flex justify="center">
           <Button
             onClick={onReset}
-            variant="ghost"
-            color="whiteAlpha.600"
+            variant="outline"
+            borderColor="#33485c"
+            borderRadius="10px"
+            color="whiteAlpha.800"
             size="sm"
-            _hover={{ color: '#ff9b9b', bg: 'whiteAlpha.50' }}
+            boxShadow="0 2px 8px rgba(0, 0, 0, 0.35)"
+            _hover={{ color: '#ff9b9b', borderColor: '#ff9b9b', bg: 'whiteAlpha.50' }}
           >
             Reset all stats
           </Button>

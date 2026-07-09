@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, Button, Flex, Heading, HStack, Text, VStack } from '@chakra-ui/react'
-import { UserButton } from '@clerk/clerk-react'
+import { useAuth, UserButton } from '@clerk/clerk-react'
+import { fetchUserData, saveUserData, clearCloudHistory } from './lib/api'
 import { FiSettings } from 'react-icons/fi'
 import { dealHoleCards, handToKey, displayRank, SUIT_SYMBOL } from './poker/cards'
 import {
@@ -28,12 +29,65 @@ function newHand(format) {
 }
 
 export default function App() {
+  const { getToken } = useAuth()
   const [settings, setSettings] = useState(() => loadSettings())
   const [hand, setHand] = useState(() => newHand(settings.tableFormat))
   const [result, setResult] = useState(null)
   const [history, setHistory] = useState(() => loadHistory())
   const [showReport, setShowReport] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+
+  // On mount: pull cloud data and merge (cloud wins as source of truth).
+  useEffect(() => {
+    let cancelled = false
+    async function syncFromCloud() {
+      try {
+        const token = await getToken()
+        if (!token) return
+        const data = await fetchUserData(token)
+        if (cancelled) return
+        if (Array.isArray(data.history) && data.history.length > 0) {
+          setHistory(data.history)
+          saveHistory(data.history)
+        }
+        if (data.settings && typeof data.settings === 'object' && Object.keys(data.settings).length > 0) {
+          setSettings((prev) => {
+            const merged = { ...prev, ...data.settings }
+            saveSettings(merged)
+            return merged
+          })
+        }
+      } catch {
+        // Cloud unavailable — localStorage values remain active.
+      }
+    }
+    syncFromCloud()
+    return () => { cancelled = true }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Debounced cloud history save — fires 2 s after the last hand.
+  const historySyncTimer = useRef(null)
+  useEffect(() => {
+    clearTimeout(historySyncTimer.current)
+    historySyncTimer.current = setTimeout(async () => {
+      try {
+        const token = await getToken()
+        if (token) await saveUserData({ history }, token)
+      } catch { /* silent */ }
+    }, 2000)
+    return () => clearTimeout(historySyncTimer.current)
+  }, [history]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Cloud settings save — fires immediately on change.
+  useEffect(() => {
+    async function syncSettings() {
+      try {
+        const token = await getToken()
+        if (token) await saveUserData({ settings }, token)
+      } catch { /* silent */ }
+    }
+    syncSettings()
+  }, [settings]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const { scenario, cards, handKey } = hand
   const rake = getRakeProfile(settings.rakeProfile)
@@ -102,7 +156,9 @@ export default function App() {
     setShowReport(false)
     setHand(newHand(settings.tableFormat))
     setResult(null)
-  }, [settings.tableFormat])
+    // Best-effort cloud clear (fire and forget).
+    getToken().then((token) => { if (token) clearCloudHistory(token) }).catch(() => {})
+  }, [settings.tableFormat, getToken])
 
   const accuracy = score.total ? Math.round((score.correct / score.total) * 100) : 0
   const reportReady = score.total >= MIN_HANDS_FOR_REPORT
@@ -141,6 +197,18 @@ export default function App() {
                 {score.correct}/{score.total}
               </Text>
             </VStack>
+            <Button
+              onClick={handleReset}
+              variant="outline"
+              borderColor="#33485c"
+              color="whiteAlpha.800"
+              fontWeight="700"
+              size="sm"
+              borderRadius="10px"
+              _hover={{ bg: 'whiteAlpha.100', color: '#ff9b9b', borderColor: '#ff9b9b' }}
+            >
+              Reset session
+            </Button>
             <Button
               onClick={() => setShowReport((s) => !s)}
               bg={showReport ? 'whiteAlpha.200' : reportReady ? '#ffd27a' : 'whiteAlpha.100'}
