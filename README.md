@@ -27,14 +27,6 @@ This Texas Hold 'Em GTO Web App is built for poker enthusiasts, especially begin
 - **Interactive User Interface**: Intuitive and user-friendly web design for seamless navigation.
 - **Real-Time Feedback**: Instant responses powered by OpenAI's GPT-4 API.
 
-## Installation
+## Play
+- Simply play on gto-holdem-trainer.com for free :-)
 
-### Prerequisites
-- Node.js (v16 or higher)
-- npm (v8 or higher)
-- OpenAI API key
-
-### Steps
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/texas-holdem-gto.git
