@@ -1,3 +1,4 @@
+## Introduction
 # Texas Hold 'Em Game Theory Optimal (GTO) Web App
 
 A web-based application designed to help new poker players make profitable decisions by focusing on pre-flop fundamentals. This app leveraged Claude Opus 4.8 & Fable to provide Game Theory Optimal (GTO) insights for Texas Hold 'Em, guiding players to improve their poker strategy and decision-making skills.
@@ -16,9 +17,6 @@ A web-based application designed to help new poker players make profitable decis
 
 ---
 
-## Introduction
-
-This Texas Hold 'Em GTO Web App is built for poker enthusiasts, especially beginners, to learn the fundamental strategies of poker. The app emphasizes pre-flop decision-making, allowing users to understand profitable plays using GTO principles. Powered by OpenAI's GPT-4, it offers detailed advice on hands, positions, and betting strategies.
 
 ## Features
 - **Pre-Flop Decision Assistance**: Provides GTO-based recommendations for starting hands.
